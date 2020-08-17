@@ -11,6 +11,7 @@
 
 #include <filesystem>
 
+#include <winrt/Windows.Storage.h>
 #include <winrt/Windows.Web.Http.Headers.h>
 
 #include "AutolinkedNativeModules.g.h"
@@ -19,8 +20,32 @@
 using ReactTestApp::ReactInstance;
 using winrt::ReactTestApp::implementation::ReactPackageProvider;
 using winrt::Windows::Foundation::IAsyncOperation;
+using winrt::Windows::Foundation::PropertyValue;
 using winrt::Windows::Foundation::Uri;
+using winrt::Windows::Storage::ApplicationData;
 using winrt::Windows::Web::Http::HttpClient;
+
+namespace
+{
+    winrt::hstring const kBreakOnFirstLine = L"breakOnFirstLine";
+    winrt::hstring const kUseDirectDebugger = L"useDirectDebugger";
+    winrt::hstring const kUseFastRefresh = L"useFastRefresh";
+    winrt::hstring const kUseWebDebugger = L"useWebDebugger";
+
+    bool RetrieveLocalSetting(winrt::hstring const &key, bool defaultValue)
+    {
+        auto localSettings = ApplicationData::Current().LocalSettings();
+        auto values = localSettings.Values();
+        return winrt::unbox_value_or<bool>(values.Lookup(key), defaultValue);
+    }
+
+    void StoreLocalSetting(winrt::hstring const &key, bool value)
+    {
+        auto localSettings = ApplicationData::Current().LocalSettings();
+        auto values = localSettings.Values();
+        values.Insert(key, PropertyValue::CreateBoolean(value));
+    }
+}  // namespace
 
 ReactInstance::ReactInstance()
 {
@@ -32,22 +57,85 @@ ReactInstance::ReactInstance()
 void ReactInstance::LoadJSBundleFrom(JSBundleSource source)
 {
     auto instanceSettings = reactNativeHost_.InstanceSettings();
-    instanceSettings.UseLiveReload(source == JSBundleSource::DevServer);
-    instanceSettings.UseWebDebugger(source == JSBundleSource::DevServer);
-    instanceSettings.UseFastRefresh(source == JSBundleSource::DevServer);
-
     switch (source) {
         case JSBundleSource::DevServer:
             instanceSettings.JavaScriptMainModuleName(L"index");
             instanceSettings.JavaScriptBundleFile(L"");
             break;
         case JSBundleSource::Embedded:
-            winrt::hstring bundleFileName = winrt::to_hstring(GetBundleName());
-            instanceSettings.JavaScriptBundleFile(bundleFileName);
+            instanceSettings.JavaScriptBundleFile(winrt::to_hstring(GetBundleName()));
             break;
     }
 
+    Reload();
+}
+
+void ReactInstance::Reload()
+{
+    auto instanceSettings = reactNativeHost_.InstanceSettings();
+
+    instanceSettings.UseWebDebugger(UseWebDebugger());
+    instanceSettings.UseDirectDebugger(UseDirectDebugger());
+
+    auto useFastRefresh = UseFastRefresh();
+    instanceSettings.UseFastRefresh(useFastRefresh);
+    instanceSettings.UseLiveReload(useFastRefresh);
+
+    // instanceSettings.EnableDeveloperMenu(false);
+
     reactNativeHost_.ReloadInstance();
+}
+
+bool ReactInstance::BreakOnFirstLine() const
+{
+    return RetrieveLocalSetting(kBreakOnFirstLine, false);
+}
+
+void ReactInstance::BreakOnFirstLine(bool breakOnFirstLine)
+{
+    StoreLocalSetting(kBreakOnFirstLine, breakOnFirstLine);
+    Reload();
+}
+
+bool ReactInstance::UseDirectDebugger() const
+{
+    return RetrieveLocalSetting(kUseDirectDebugger, false);
+}
+
+void ReactInstance::UseDirectDebugger(bool useDirectDebugger)
+{
+    if (useDirectDebugger) {
+        // Remote debugging is incompatible with direct debugging
+        StoreLocalSetting(kUseWebDebugger, false);
+    }
+    StoreLocalSetting(kUseDirectDebugger, useDirectDebugger);
+    Reload();
+}
+
+bool ReactInstance::UseFastRefresh() const
+{
+    return RetrieveLocalSetting(kUseFastRefresh, true);
+}
+
+void ReactInstance::UseFastRefresh(bool useFastRefresh)
+{
+    StoreLocalSetting(kUseFastRefresh, useFastRefresh);
+    Reload();
+}
+
+bool ReactInstance::UseWebDebugger() const
+{
+    return RetrieveLocalSetting(kUseWebDebugger, false);
+}
+
+void ReactInstance::UseWebDebugger(bool useWebDebugger)
+{
+    if (useWebDebugger) {
+        // Remote debugging is incompatible with direct debugging
+        StoreLocalSetting(kUseDirectDebugger, false);
+    }
+    StoreLocalSetting(kUseWebDebugger, useWebDebugger);
+    Reload();
 }
 
 std::string ReactTestApp::GetBundleName()

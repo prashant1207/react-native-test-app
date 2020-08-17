@@ -19,11 +19,21 @@
                 <TextBlock x:Name="AppTitle" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Grid>
             <MenuBar x:Name="AppMenuBar" HorizontalAlignment="Left" VerticalContentAlignment="Stretch" Width="Auto">
-                <MenuBarItem x:Name="ReactMenuBarItem" Title="React">
+                <MenuBarItem x:Name="ReactMenuBarItem" Title="React" AccessKey="R">
                     <MenuFlyoutItem Text="Load from JS bundle" Click="LoadFromJSBundle"/>
                     <MenuFlyoutItem Text="Load from dev server" Click="LoadFromDevServer"/>
-                    <MenuFlyoutItem Text="Open debug menu" Click="OpenDebugMenu" KeyboardAcceleratorTextOverride="Ctrl+Shift+D" x:Name="OpenDebugMenuButton" IsEnabled="false"/>
                     <MenuFlyoutSeparator/>
+                </MenuBarItem>
+                <MenuBarItem Title="Debug" AccessKey="D">
+                    <MenuBarItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="D" Modifiers="Control,Shift"/>
+                    </MenuBarItem.KeyboardAccelerators>
+                    <MenuFlyoutItem Text="Reload JavaScript" Click="Reload"/>
+                    <MenuFlyoutItem x:Name="WebDebuggerMenuItem" Click="ToggleWebDebugger"/>
+                    <MenuFlyoutItem x:Name="DirectDebuggingMenuItem" Click="ToggleDirectDebugger"/>
+                    <MenuFlyoutItem x:Name="BreakOnFirstLineMenuItem" Click="ToggleBreakOnFirstLine"/>
+                    <MenuFlyoutItem x:Name="FastRefreshMenuItem" Click="ToggleFastRefresh"/>
+                    <MenuFlyoutItem Text="Toggle Inspector" IsEnabled="False"/>
                 </MenuBarItem>
             </MenuBar>
         </Grid>
