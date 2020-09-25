@@ -9,6 +9,7 @@
 
 #include "ReactInstance.h"
 
+#include <NativeModules.h>
 #include <filesystem>
 
 #include <winrt/Windows.Storage.h>
@@ -45,6 +46,25 @@ namespace
         auto values = localSettings.Values();
         values.Insert(key, PropertyValue::CreateBoolean(value));
     }
+
+    REACT_MODULE(DevSettings)
+    struct DevSettings {
+        REACT_INIT(Initialize)
+        void Initialize(winrt::Microsoft::ReactNative::ReactContext const &reactContext) noexcept
+        {
+            context_ = reactContext;
+        }
+
+        static void ToggleElementInspector() noexcept
+        {
+            context_.CallJSFunction(L"RCTDeviceEventEmitter", L"emit", L"toggleElementInspector");
+        }
+
+    private:
+        static winrt::Microsoft::ReactNative::ReactContext context_;
+    };
+
+    winrt::Microsoft::ReactNative::ReactContext DevSettings::context_ = nullptr;
 }  // namespace
 
 ReactInstance::ReactInstance()
@@ -81,7 +101,7 @@ void ReactInstance::Reload()
     instanceSettings.UseFastRefresh(useFastRefresh);
     instanceSettings.UseLiveReload(useFastRefresh);
 
-    // instanceSettings.EnableDeveloperMenu(false);
+    instanceSettings.EnableDeveloperMenu(false);
 
     reactNativeHost_.ReloadInstance();
 }
@@ -95,6 +115,11 @@ void ReactInstance::BreakOnFirstLine(bool breakOnFirstLine)
 {
     StoreLocalSetting(kBreakOnFirstLine, breakOnFirstLine);
     Reload();
+}
+
+void ReactInstance::ToggleElementInspector() const
+{
+    DevSettings::ToggleElementInspector();
 }
 
 bool ReactInstance::UseDirectDebugger() const

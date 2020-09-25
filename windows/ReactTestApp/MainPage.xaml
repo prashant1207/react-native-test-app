@@ -33,7 +33,7 @@
                     <MenuFlyoutItem x:Name="DirectDebuggingMenuItem" Click="ToggleDirectDebugger"/>
                     <MenuFlyoutItem x:Name="BreakOnFirstLineMenuItem" Click="ToggleBreakOnFirstLine"/>
                     <MenuFlyoutItem x:Name="FastRefreshMenuItem" Click="ToggleFastRefresh"/>
-                    <MenuFlyoutItem Text="Toggle Inspector" IsEnabled="False"/>
+                    <MenuFlyoutItem Text="Toggle Inspector" Click="ToggleInspector"/>
                 </MenuBarItem>
             </MenuBar>
         </Grid>

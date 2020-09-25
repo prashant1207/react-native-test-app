@@ -34,6 +34,8 @@ namespace winrt::ReactTestApp::implementation
                                   Windows::UI::Xaml::RoutedEventArgs);
         void ToggleFastRefresh(Windows::Foundation::IInspectable const &,
                                Windows::UI::Xaml::RoutedEventArgs);
+        void ToggleInspector(Windows::Foundation::IInspectable const &,
+                             Windows::UI::Xaml::RoutedEventArgs);
         void ToggleWebDebugger(Windows::Foundation::IInspectable const &,
                                Windows::UI::Xaml::RoutedEventArgs);
 

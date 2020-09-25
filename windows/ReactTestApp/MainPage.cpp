@@ -142,6 +142,12 @@ void MainPage::ToggleFastRefresh(IInspectable const &sender, RoutedEventArgs)
     reactInstance_.UseFastRefresh(useFastRefresh);
 }
 
+void MainPage::ToggleInspector(Windows::Foundation::IInspectable const &,
+                               Windows::UI::Xaml::RoutedEventArgs)
+{
+    reactInstance_.ToggleElementInspector();
+}
+
 void MainPage::ToggleWebDebugger(IInspectable const &sender, RoutedEventArgs)
 {
     auto const useWebDebugger = ToggleMenuItem(sender, kEnableWebDebugger, kDisableWebDebugger);

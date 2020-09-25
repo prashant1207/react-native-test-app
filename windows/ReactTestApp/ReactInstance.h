@@ -35,6 +35,8 @@ namespace ReactTestApp
         bool BreakOnFirstLine() const;
         void BreakOnFirstLine(bool);
 
+        void ToggleElementInspector() const;
+
         bool UseDirectDebugger() const;
         void UseDirectDebugger(bool);
 
